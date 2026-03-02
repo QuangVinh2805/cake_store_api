@@ -22,6 +22,8 @@ public class UserResponse {
     private String role;
     private String token;
     private String avatar;
+    private String hashId;
+    private Long status;
 
     public UserResponse(User user) {
 //        this.id = user.getId();
@@ -33,6 +35,8 @@ public class UserResponse {
         this.birthday = user.getBirthday();
         this.token = user.getToken();
         this.avatar = user.getAvatar();
+        this.hashId = user.getHashId();
+        this.status = user.getStatus();
 
         if (user.getRoleId() == User.ROLE_ADMIN) {
             this.role = "ADMIN";

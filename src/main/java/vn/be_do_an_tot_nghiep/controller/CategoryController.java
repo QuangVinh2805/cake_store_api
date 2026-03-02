@@ -1,6 +1,7 @@
 package vn.be_do_an_tot_nghiep.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.be_do_an_tot_nghiep.model.Category;
@@ -16,10 +17,27 @@ public class CategoryController {
     CategoryService categoryService;
 
     // GET all
+    @GetMapping("/getAllPaging")
+    public Page<Category> getAllCategoriesPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return categoryService.getAllPaging(page, size);
+    }
+
     @GetMapping("/getAll")
+    public List<Category> getAllCategoriesByStatus() {
+        return categoryService.getAllByStatus();
+    }
+
+
+    @GetMapping("/getAllCate")
     public List<Category> getAllCategories() {
         return categoryService.getAll();
     }
+
+
+
 
     // GET by id
     @GetMapping("/getById")
@@ -31,13 +49,11 @@ public class CategoryController {
         }
     }
 
-    // POST create
     @PostMapping("/create")
     public Category createCategory(@RequestBody Category category) {
         return categoryService.create(category);
     }
 
-    // PUT update
     @PutMapping("/update")
     public ResponseEntity<Category> updateCategory(@RequestParam Long id, @RequestBody Category category) {
         try {
@@ -47,14 +63,9 @@ public class CategoryController {
         }
     }
 
-    // DELETE
-    @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCategory(@RequestParam Long id) {
-        try {
-            categoryService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/changeStatus")
+    public ResponseEntity<String> changeStatus(@RequestParam Long id){
+        categoryService.changeStatus(id);
+        return ResponseEntity.ok("Đổi trạng thái thành công!");
     }
 }

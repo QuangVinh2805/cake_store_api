@@ -7,4 +7,8 @@ import vn.be_do_an_tot_nghiep.model.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
+    Role findRoleById(Long id);
+
+    Role findByRole(String role);
+
 }

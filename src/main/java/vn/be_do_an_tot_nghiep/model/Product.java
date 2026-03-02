@@ -60,9 +60,12 @@ public class Product {
 
     @ColumnDefault("1")
     @Column(name = "status")
-    private Byte status;
+    private Long status;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private List<ProductTaste> tastes;
+//    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+//    private List<ProductTaste> tastes;
+
+
+
 
 }

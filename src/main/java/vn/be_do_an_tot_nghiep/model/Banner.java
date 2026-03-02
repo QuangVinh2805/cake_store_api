@@ -19,10 +19,6 @@ public class Banner {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
-
     @Size(max = 255)
     @Column(name = "product_name")
     private String productName;

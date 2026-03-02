@@ -12,19 +12,35 @@ import java.util.List;
 public interface ProductTagRepository extends JpaRepository<ProductTag, Long> {
     List<ProductTag> findByTagId_Id(Long tagId);
 
-    @Query("""
-    SELECT new vn.be_do_an_tot_nghiep.response.ProductTagResponse(
-        t.tag,
-        p.hashId,
+    @Query(value = """
+    SELECT
+        p.hash_id,
         p.name,
         p.image,
         p.price,
-        p.category.id
-    )
-    FROM Product p
-    LEFT JOIN ProductTag t ON p.id = t.productId.id
-""")
-    List<ProductTagResponse> findAllWithTags();
+        p.category_id,
+        c.name as category_name,
+        p.status,
+        GROUP_CONCAT(t.tag SEPARATOR ',') as tags
+    FROM product p
+    LEFT JOIN product_tag t ON p.id = t.product_id
+    LEFT JOIN category c ON p.category_id = c.id
+    GROUP BY p.id
+""", nativeQuery = true)
+    List<Object[]> findAllWithGroupedTags();
+
+
+
+
+
+    List<ProductTag> findAllByProductId_IdAndTagIn(
+            Long productId,
+            List<String> tags
+    );
+
+    boolean existsByProductId_IdAndTag(Long productId, String tag);
+
+
 
 
 }

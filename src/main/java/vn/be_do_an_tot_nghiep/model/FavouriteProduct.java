@@ -36,13 +36,7 @@
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "user_id", nullable = false)
         private User user;
-    
-        @Column(name = "rating", precision = 2, scale = 1)
-        private Long rating;
-    
-        @Lob
-        @Column(name = "content")
-        private String content;
+
     
         @ColumnDefault("current_timestamp()")
         @Column(name = "created_at")

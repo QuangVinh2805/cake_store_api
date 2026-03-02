@@ -22,10 +22,7 @@ public class ProductTaste {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private Long productId;
 
     @Size(max = 255)
     @NotNull

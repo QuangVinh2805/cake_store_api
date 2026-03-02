@@ -2,17 +2,20 @@ package vn.be_do_an_tot_nghiep.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import vn.be_do_an_tot_nghiep.model.Category;
 import vn.be_do_an_tot_nghiep.model.FavouriteProduct;
 import vn.be_do_an_tot_nghiep.model.Product;
 import vn.be_do_an_tot_nghiep.model.Tag;
 import vn.be_do_an_tot_nghiep.request.FavouriteProductRequest;
 import vn.be_do_an_tot_nghiep.request.ProductRequest;
 import vn.be_do_an_tot_nghiep.request.ProductTasteRequest;
+import vn.be_do_an_tot_nghiep.request.UpdateProductTagRequest;
 import vn.be_do_an_tot_nghiep.response.*;
 import vn.be_do_an_tot_nghiep.service.ProductService;
 
@@ -29,9 +32,21 @@ public class ProductController {
 
     // GET all
     @GetMapping
-    public List<ProductTagResponse> getAllProducts() {
-        return productService.getAll();
+    public Page<ProductListResponse> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return productService.getAll(page, size);
     }
+
+    @GetMapping("/getAllProductByStatus")
+    public Page<ProductListResponse> getAllProductsByStatus(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return productService.getAllProductByStatus(page, size);
+    }
+
 
     // GET by hashId
     @GetMapping("/getByHashId")
@@ -98,9 +113,33 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/getAllTagsPaging")
+    public Page<Tag> getAllTagsPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return productService.getAllTagPaging(page, size);
+    }
+
     @GetMapping("/getAllTags")
     public List<Tag> getAllTags() {
         return productService.getAllTag();
+    }
+
+
+
+    @PostMapping("/tag/create")
+    public Tag createTag(@RequestBody Tag tag) {
+        return productService.create(tag);
+    }
+
+    @PutMapping("/tag/update")
+    public ResponseEntity<Tag> updateTag(@RequestParam Long id, @RequestBody Tag tag) {
+        try {
+            return ResponseEntity.ok(productService.update(id, tag));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // GET by id
@@ -115,48 +154,63 @@ public class ProductController {
 
     // POST create
     @PostMapping("/createTag")
-    public ProductTagResponse createTag(@RequestParam Long productId, @RequestParam String tag) {
-        return productService.create(productId, tag);
+    public ProductTagResponse createTag(
+            @RequestParam String productHashId,
+            @RequestParam String tag
+    ) {
+        return productService.createByHashId(productHashId, tag);
     }
 
-    // PUT update
+
+
     @PutMapping("/updateTag")
-    public ResponseEntity<ProductTagResponse> updateTag(@RequestParam Long id, @RequestParam String tag) {
-        try {
-            return ResponseEntity.ok(productService.update(id, tag));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<List<ProductTagResponse>> updateTag(
+            @RequestBody UpdateProductTagRequest request
+    ) {
+        return ResponseEntity.ok(productService.updateByProductHashId(request));
     }
 
-    // DELETE
-    @DeleteMapping("/deleteTag")
-    public ResponseEntity<Void> deleteTag(@RequestParam Long id) {
-        try {
-            productService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+    @PutMapping("/changeStatusTag")
+    public ResponseEntity<String> changeStatusTag(@RequestParam  Long id){
+        productService.changeStatusTag(id);
+        return ResponseEntity.ok("Đổi trạng thái thành công!");
     }
 
     @GetMapping("/getProductByTag")
-    public ResponseEntity<List<ProductTagResponse>> getProductByTag(@RequestParam Long tagId) {
-        return ResponseEntity.ok(productService.getProductTagsByTagId(tagId));
+    public ResponseEntity<PageResponse<ProductListResponse>> getProductByTag(@RequestParam Long tagId,
+                                                                            @RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "12") int size) {
+        return ResponseEntity.ok(productService.getProductByTag(tagId,page,size));
+    }
+
+    @GetMapping("/getProductByTagOne")
+    public ResponseEntity<PageResponse<ProductListResponse>> getProductByTagOne(@RequestParam Long tagId,
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(productService.getProductByTagOne(tagId,page,size));
     }
 
     @GetMapping("/getProductByCategoryId")
-    public List<ProductTagResponse> getProductByCategoryId(@RequestParam Long categoryId) {
-        return productService.getProductByCategoryId(categoryId);
+    public ResponseEntity<PageResponse<ProductListResponse>> getProductByCategory(
+            @RequestParam Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return ResponseEntity.ok(
+                productService.getProductByCategory(categoryId, page, size)
+        );
     }
 
+
     @GetMapping("/getProductByCategoryAndTag")
-    public ResponseEntity<List<ProductTagResponse>> getProductByCategoryAndTag(
-            @RequestParam Long categoryId,
-            @RequestParam Long tagId
+    public ResponseEntity<PageResponse<ProductListResponse>> getProductByCategoryAndTag(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long tagId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
     ) {
-        List<ProductTagResponse> result = productService.getProductsByCategoryAndTag(categoryId, tagId);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(productService.getProductByCategoryAndTag(categoryId, tagId, page, size));
     }
 
 
@@ -181,9 +235,12 @@ public class ProductController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<?> getProductDetail(@RequestParam String hashId) {
+    public ResponseEntity<?> getProductDetail(
+            @RequestParam String hashId,
+            @RequestParam(required = false) String token // Thêm token để check favourite
+    ) {
         try {
-            ProductDetailResponse response = productService.getProductDetailByHashId(hashId);
+            ProductDetailResponse response = productService.getProductDetailByHashId(hashId, token);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -200,5 +257,51 @@ public class ProductController {
         ProductTasteRequest req = mapper.readValue(data, ProductTasteRequest.class);
         return productService.createProductTaste(req, image);
     }
+
+    @PutMapping(value = "/taste/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductTasteResponse updateTaste(
+            @RequestPart("data") String data,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProductTasteRequest req = mapper.readValue(data, ProductTasteRequest.class);
+
+        return productService.updateProductTasteByTaste(req, image);
+    }
+
+
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<?>> searchProduct(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+
+    ) {
+        return ResponseEntity.ok(
+                productService.searchProductByStatus(keyword, page, size)
+        );
+    }
+
+
+    @GetMapping("/searchAllProduct")
+    public ResponseEntity<Page<?>> searchAllProduct(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+
+    ) {
+        return ResponseEntity.ok(
+                productService.searchAllProduct(keyword, page, size)
+        );
+    }
+
+    @PutMapping("/changeStatus")
+    public ResponseEntity<String> changeStatus(@RequestParam  String hashId){
+        productService.changeStatus(hashId);
+        return ResponseEntity.ok("Đổi trạng thái thành công!");
+    }
+
 
 }

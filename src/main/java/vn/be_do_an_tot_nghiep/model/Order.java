@@ -24,11 +24,7 @@ public class Order {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Long userId;
 
     @Column(name = "total_price", precision = 15, scale = 2)
     private Long totalPrice;
@@ -48,5 +44,7 @@ public class Order {
     @NotNull
     @Column(name = "status", nullable = false)
     private Long status;
+
+    private Long isCheckout;
 
 }

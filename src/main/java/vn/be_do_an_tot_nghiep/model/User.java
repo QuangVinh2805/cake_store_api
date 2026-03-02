@@ -70,4 +70,8 @@ public class User {
     @Column(name = "avatar", length = 100)
     private String avatar;
 
+    private String hashId;
+    private Long status;
+
+
 }

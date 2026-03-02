@@ -21,17 +21,9 @@ public class Cart {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Long userId;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private Long productTasteId;
 
     @ColumnDefault("current_timestamp()")
     @Column(name = "created_at")

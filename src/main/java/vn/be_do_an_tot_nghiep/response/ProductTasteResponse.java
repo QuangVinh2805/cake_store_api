@@ -13,5 +13,6 @@ public class ProductTasteResponse {
     private Long price;
     private String secondDes;
     private Long quantity;
+    private Long productTasteId;
     private String productHashId;
 }

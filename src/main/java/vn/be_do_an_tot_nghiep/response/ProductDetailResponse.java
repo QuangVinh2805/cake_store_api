@@ -13,5 +13,9 @@ public class ProductDetailResponse {
     private String name;
     private String hashId;
     private String firstDes;
+    private Long price;
+    private String categoryName;
+    private Long categoryId;
+    private Long statusFavourite;
     private List<ProductTasteResponse> tastes;
 }

@@ -15,4 +15,5 @@ public class ProductTagResponse {
     private String image;
     private Long price;
     private Long categoryId;
+    private String categoryName;
 }
